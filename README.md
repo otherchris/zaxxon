@@ -1,21 +1,12 @@
 # Zaxxon
 
-**TODO: Add description**
+This is a toy neural net implementation in Elixir that I'm building with
+a vague understanding of how these things work. Just tiptoeing into it and
+feeling my way around.
 
-## Installation
+I called it "Zaxxon" because I'm building from the bottom up and wasn't 100%
+sure what exactly I'm building. Needed a word, "Zaxxon" sounds cool, not
+rewriting git history over it.
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `zaxxon` to your list of dependencies in `mix.exs`:
 
-```elixir
-def deps do
-  [
-    {:zaxxon, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/zaxxon](https://hexdocs.pm/zaxxon).
 
