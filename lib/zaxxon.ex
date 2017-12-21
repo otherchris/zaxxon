@@ -35,7 +35,10 @@ defmodule Zaxxon do
   defstruct threshold_matrix: Matrix.new([[0.5, 0.5]], 1, 2), weights_tensor: Tensor.new([0.1])
 
   @doc """
-  Neuron activates if inputs * weights > threshold
+  Neuron activates if (inputs * weights) / # of inputs > threshold
+
+  Normalizing by the number of inputs seems weird, but assuming a constant number of
+  nodes per layer it seems less weird.
 
   ## Examples
 
