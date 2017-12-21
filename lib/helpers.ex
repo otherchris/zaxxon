@@ -8,13 +8,13 @@ defmodule Zaxxon.Helpers do
 
   ## Examples
 
-      iex> Zaxxon.cap(1.2)
+      iex> Zaxxon.Helpers.cap(1.2)
       1
 
-      iex> Zaxxon.cap(-0.5)
+      iex> Zaxxon.Helpers.cap(-0.5)
       0
 
-      iex> Zaxxon.cap(0.5)
+      iex> Zaxxon.Helpers.cap(0.5)
       0.5
   """
   def cap(x) do

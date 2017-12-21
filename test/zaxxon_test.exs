@@ -2,6 +2,7 @@ defmodule ZaxxonTest do
   use ExUnit.Case
   use Tensor
   doctest Zaxxon
+  doctest Zaxxon.Helpers
 
   @zax %Zaxxon{
     threshold_matrix: Matrix.new([
