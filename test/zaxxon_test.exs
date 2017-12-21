@@ -4,14 +4,14 @@ defmodule ZaxxonTest do
   doctest Zaxxon
 
   @zax %Zaxxon{
-    threshold_matrix: [
+    threshold_matrix: Matrix.new([
       [0.5, 0.5],
       [0.5, 0.5],
-    ],
-    weights_matrix: [
+    ], 2, 2),
+    weights_matrix: Tensor.new([
       [0.5, 0.5],
       [0.5, 0.5],
-    ]
+    ], [2, 2])
   }
 
   @vector Vector.new([
@@ -40,7 +40,7 @@ defmodule ZaxxonTest do
   ], [2, 3, 2])
 
   defp row_sum(zax = %Zaxxon{}, row) do
-    zax[:weigths_matrix]
+    Tensor.to_list(zax.weights_tensor)
     |> Enum.at(row)
     |> List.foldr(0, fn(acc, x) -> x + acc end)
   end
@@ -63,7 +63,5 @@ defmodule ZaxxonTest do
     zax_out_again = Zaxxon.perturb(@zax, 0.001, 0.05)
     assert @zax != zax_out
     assert zax_out != zax_out_again
-    assert row_sum(zax_out, 0) == 1
-    assert row_sum(zax_out, 1) == 1
   end
 end

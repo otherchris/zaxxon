@@ -37,10 +37,10 @@ defmodule Zaxxon do
 
   ## Examples
 
-      iex> Zaxxon.activate?([0.4, 0.2, 0.2], [0.5, 0.5, 0], 0.4)
+      iex> Zaxxon.activate?([0.4, 0.2, 0.2], [0.5, 0.5, 0], 0.2)
       false
 
-      iex> Zaxxon.activate?([0.8, 0.2, 0.2], [0.5, 0.5, 0], 0.4)
+      iex> Zaxxon.activate?([0.8, 0.2, 0.2], [0.5, 0.5, 0], 0.15)
       true
 
   """
@@ -48,6 +48,7 @@ defmodule Zaxxon do
     a = Enum.with_index(inputs)
       |> Enum.map(fn({x, i}) -> x * Enum.at(weights, i) end)
       |> List.foldr(0, fn(acc, x) -> x + acc end)
+      |> Kernel./(length(inputs))
     cond do
         a > threshold -> true
         true -> false
@@ -94,6 +95,16 @@ defmodule Zaxxon do
   end
 
   @doc """
+  Perturb a zaxxon
+  """
+  def perturb(%Zaxxon{threshold_matrix: tm, weights_matrix: wm} = zax, frequency, intensity) do
+    %Zaxxon{
+      threshold_matrix: perturb(tm, frequency, intensity),
+      weights_matrix: perturb(wm, frequency, intensity)
+    }
+  end
+
+  @doc """
   Perturb a Tensor
   """
   def perturb(m, frequency, intensity) do
@@ -106,13 +117,6 @@ defmodule Zaxxon do
         Tensor.map(m, fn(x) -> perturb(x, frequency, intensity) end)
       true -> :error
     end
-  end
-
-  @doc """
-  Perturb a zaxxon
-  """
-  def perturb(%Zaxxon{threshold_matrix: tm, weights_matrix: wm} = zax, frequency, intensity) do
-
   end
 
 end
