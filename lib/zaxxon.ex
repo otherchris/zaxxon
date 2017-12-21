@@ -27,6 +27,8 @@ defmodule Zaxxon do
   """
 
   use Tensor
+  alias Zaxxon.Helpers
+
   @doc """
   Struct representing a zaxxon
   """
@@ -56,28 +58,6 @@ defmodule Zaxxon do
   end
 
   @doc """
-  Normalize a number between 0 and 1
-
-  ## Examples
-
-      iex> Zaxxon.cap(1.2)
-      1
-
-      iex> Zaxxon.cap(-0.5)
-      0
-
-      iex> Zaxxon.cap(0.5)
-      0.5
-  """
-  def cap(x) do
-    cond do
-      x > 1 -> 1
-      x < 0 -> 0
-      true -> x
-    end
-  end
-
-  @doc """
   Apply a scalar perturbation
 
   (How do you test this?)
@@ -87,8 +67,8 @@ defmodule Zaxxon do
     case roll > frequency do
       true ->
         case rem(round(roll * 100), 2) do
-          0 -> cap(x + intensity)
-          1 -> cap(x - intensity)
+          0 -> Helpers.cap(x + intensity)
+          1 -> Helpers.cap(x - intensity)
         end
       false -> x
     end
