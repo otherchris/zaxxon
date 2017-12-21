@@ -55,18 +55,64 @@ defmodule Zaxxon do
   end
 
   @doc """
-  Perturb a zaxxon
-  """
-  def perturb(%Zaxxon{threshold_matrix: tm, weights_matrix: wm} = zax, frequency, intensity) do
+  Normalize a number between 0 and 1
 
+  ## Examples
+
+      iex> Zaxxon.cap(1.2)
+      1
+
+      iex> Zaxxon.cap(-0.5)
+      0
+
+      iex> Zaxxon.cap(0.5)
+      0.5
+  """
+  def cap(x) do
+    cond do
+      x > 1 -> 1
+      x < 0 -> 0
+      true -> x
+    end
+  end
+
+  @doc """
+  Apply a scalar perturbation
+
+  (How do you test this?)
+  """
+  def perturb(x, frequency, intensity) when is_number(x) do
+    roll = Enum.random(1..100) / 100
+    case roll > frequency do
+      true ->
+        case rem(round(roll * 100), 2) do
+          0 -> cap(x + intensity)
+          1 -> cap(x - intensity)
+        end
+      false -> x
+    end
   end
 
   @doc """
   Perturb a Tensor
   """
-  def perturb(m, frequency, intensity) when is_list(m) do
+  def perturb(m, frequency, intensity) do
+    cond do
+      Vector.vector?(m) ->
+        Vector.map(m, fn(x) -> perturb(x, frequency, intensity) end)
+      Matrix.matrix?(m) ->
+        Matrix.map(m, fn(x) -> perturb(x, frequency, intensity) end)
+      length(Tensor.dimensions(m)) > 2 ->
+        Tensor.map(m, fn(x) -> perturb(x, frequency, intensity) end)
+      true -> :error
+    end
   end
 
+  @doc """
+  Perturb a zaxxon
+  """
+  def perturb(%Zaxxon{threshold_matrix: tm, weights_matrix: wm} = zax, frequency, intensity) do
 
+  end
 
 end
