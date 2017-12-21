@@ -21,7 +21,8 @@ defmodule Zaxxon.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:mix_test_watch, "~> 0.5", only: :dev, runtime: false}
+      {:mix_test_watch, "~> 0.5", only: :dev, runtime: false},
+      {:tensor, "~> 2.1"}
     ]
   end
 end
