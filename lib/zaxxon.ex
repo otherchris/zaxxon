@@ -32,7 +32,7 @@ defmodule Zaxxon do
   @doc """
   Struct representing a zaxxon
   """
-  defstruct threshold_matrix: Matrix.new([[0.5, 0.5]], 1, 2), weights_matrix: Tensor.new([1])
+  defstruct threshold_matrix: Matrix.new([[0.5, 0.5]], 1, 2), weights_tensor: Tensor.new([0.1])
 
   @doc """
   Neuron activates if inputs * weights > threshold
@@ -58,6 +58,24 @@ defmodule Zaxxon do
   end
 
   @doc """
+  Apply an input vector to a Zaxxon, return the output vector
+
+  ## Examples
+
+      iex> Zaxxon.apply([0.7], %Zaxxon{})
+      [false]
+
+      iex> Zaxxon.apply([0.7], %Zaxxon{weights_tensor: Tensor.new([0.6], [1])})
+      [true]
+
+      iex> Zaxxon.apply([0.4], %Zaxxon{weights_tensor: Tensor.new([0.6], [1])})
+      [false]
+  """
+  def apply(inputs, zax) do
+
+  end
+
+  @doc """
   Apply a scalar perturbation
 
   (How do you test this?)
@@ -77,10 +95,10 @@ defmodule Zaxxon do
   @doc """
   Perturb a zaxxon
   """
-  def perturb(%Zaxxon{threshold_matrix: tm, weights_matrix: wm} = zax, frequency, intensity) do
+  def perturb(%Zaxxon{threshold_matrix: tm, weights_tensor: wm} = zax, frequency, intensity) do
     %Zaxxon{
       threshold_matrix: perturb(tm, frequency, intensity),
-      weights_matrix: perturb(wm, frequency, intensity)
+      weights_tensor: perturb(wm, frequency, intensity)
     }
   end
 

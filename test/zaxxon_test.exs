@@ -9,7 +9,7 @@ defmodule ZaxxonTest do
       [0.5, 0.5],
       [0.5, 0.5],
     ], 2, 2),
-    weights_matrix: Tensor.new([
+    weights_tensor: Tensor.new([
       [0.5, 0.5],
       [0.5, 0.5],
     ], [2, 2])
