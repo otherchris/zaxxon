@@ -42,22 +42,35 @@ defmodule Zaxxon do
 
   ## Examples
 
-      iex> Zaxxon.activate?([0.4, 0.2, 0.2], [0.5, 0.5, 0], 0.2)
-      false
+      iex> Zaxxon.activate([1, 1, 0], [0.5, 0.5, 0], 0.4)
+      0
 
-      iex> Zaxxon.activate?([0.8, 0.2, 0.2], [0.5, 0.5, 0], 0.15)
-      true
+      iex> Zaxxon.activate([1, 0, 0], [0.5, 0.5, 0], 0.15)
+      1
 
   """
-  def activate?(inputs, weights, threshold) do
+  def activate(inputs, weights, threshold) do
     a = Enum.with_index(inputs)
       |> Enum.map(fn({x, i}) -> x * Enum.at(weights, i) end)
       |> List.foldr(0, fn(acc, x) -> x + acc end)
       |> Kernel./(length(inputs))
     cond do
-        a > threshold -> true
-        true -> false
+        a > threshold -> 1
+        true -> 0
     end
+  end
+
+  @doc """
+  1,0 vector * weights tensor slice ~> activate each -> 1,0 vector
+
+  ## Examples
+
+      iex> Zaxxon.apply_level([1, 0], [[0.3, 0.2], [0.2, 0.3]], [0.14, 0.1])
+      [1, 0]
+  """
+  def apply_level(inputs, weights, thresholds) do
+    Enum.with_index(weights)
+    |> Enum.map(fn({x, i}) -> activate(inputs, x, Enum.at(thresholds, i)) end)
   end
 
   @doc """
@@ -74,8 +87,7 @@ defmodule Zaxxon do
       iex> Zaxxon.apply([0.4], %Zaxxon{weights_tensor: Tensor.new([0.6], [1])})
       [false]
   """
-  def apply(inputs, zax) do
-
+  def apply(inputs, zax = %Zaxxon{ threshold_matrix: tm, weights_tensor: wt }) do
   end
 
   @doc """
