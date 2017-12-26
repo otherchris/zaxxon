@@ -102,7 +102,9 @@ defmodule Zaxxon do
   end
 
   def play do
-    ns = Enum.to_list(1..10)
+    n = %{t: 1, c: 0, next: []}
+    ns = Enum.to_list(1..10) |> Enum.map(fn(x) -> spawn neuron(n) end)
+    IO.inspect ns
   end
 
 end
