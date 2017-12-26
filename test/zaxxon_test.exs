@@ -9,7 +9,6 @@ defmodule ZaxxonTest do
     send(a, {:add_pid, b})
     send(a, {:del_pid, self()})
     send(a, {:sig, 1})
-    Process.sleep(1)
     assert Process.info(self(), :messages) == {:messages, []}
   end
 
