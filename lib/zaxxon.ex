@@ -2,134 +2,67 @@ defmodule Zaxxon do
   @moduledoc """
   Documentation for Zaxxon.
 
-  Threshold matrix:
-
-    input layer   t_11 t_12 t_13
-    hidden layer  t_21 t_22 t_23
-    output layer  t_31 t_32 t_33
-
-    indices are <layer><node>
-    for n layers and m nodes per layer an n x m matrix
-
-    Weights tensor:
-
-        w_111  w_112  w_113
-      w_121  w_122  w_123
-    w_131  w_132  w_133
-
-        w_211  w_212  w_213
-      w_221  w_222  w_223
-    w_231  w_232  w_233
-
-    indices are <layer - 1><from node><to node>
-    for n layers and m nodes per layer an (n - 1) x m x m tensor
-
   """
 
-  use Tensor
-  alias Zaxxon.Helpers
-
+  @decay 0.05
   @doc """
-  Struct representing a zaxxon
-  """
-  defstruct threshold_matrix: Matrix.new([[0.5, 0.5]], 1, 2), weights_tensor: Tensor.new([0.1])
-
-  @doc """
-  Neuron activates if (inputs * weights) / # of inputs > threshold
-
-  Normalizing by the number of inputs seems weird, but assuming a constant number of
-  nodes per layer it seems less weird.
+  Neuron loop
 
   ## Examples
 
-      iex> Zaxxon.activate([1, 1, 0], [0.5, 0.5, 0], 0.4)
-      0
+    iex> a = spawn Zaxxon.neuron(%{ c: 0, t: 1, next: [self()]  })
+    iex> send(a, {:sig, 0})
+    iex> Process.sleep(1)
+    iex> Process.info(self(), :messages)
+    {:messages, []}
 
-      iex> Zaxxon.activate([1, 0, 0], [0.5, 0.5, 0], 0.15)
-      1
+    iex> a = spawn Zaxxon.neuron(%{ c: 0, t: 1, next: [self()]  })
+    iex> send(a, {:sig, 1})
+    iex> Process.sleep(1)
+    iex> Process.info(self(), :messages)
+    {:messages, [{:sig, 1}]}
+
+    iex> a = spawn Zaxxon.neuron(%{ c: 0, t: 1, next: [self()]  })
+    iex> send(a, {:sig, 0.1})
+    iex> Process.sleep(1)
+    iex> Process.info(self(), :messages)
+    {:messages, []}
+
+    iex> a = spawn Zaxxon.neuron(%{ c: 0, t: 1, next: [self()]  })
+    iex> send(a, {:sig, 0.1})
+    iex> send(a, {:sig, 0.9})
+    iex> Process.sleep(1)
+    iex> Process.info(self(), :messages)
+    {:messages, []}
+
+    iex> a = spawn Zaxxon.neuron(%{ c: 0, t: 1, next: [self()]  })
+    iex> send(a, {:sig, 0.1})
+    iex> send(a, {:sig, 0.95})
+    iex> Process.sleep(1)
+    iex> Process.info(self(), :messages)
+    {:messages, [{:sig, 1}]}
 
   """
-  def activate(inputs, weights, threshold) do
-    a = Enum.with_index(inputs)
-      |> Enum.map(fn({x, i}) -> x * Enum.at(weights, i) end)
-      |> List.foldr(0, fn(acc, x) -> x + acc end)
-      |> Kernel./(length(inputs))
-    cond do
-        a > threshold -> 1
-        true -> 0
+  def neuron(a) do
+    fn -> loop(a) end
+  end
+
+  def loop(a = %{ c: c, t: t, next: pid_list }) when is_list(pid_list) do
+    c_new = receive do
+      {:sig, sig} -> c + sig
+      _ -> c
     end
-  end
-
-  @doc """
-  1,0 vector * weights tensor slice ~> activate each -> 1,0 vector
-
-  ## Examples
-
-      iex> Zaxxon.apply_level([1, 0], [[0.3, 0.2], [0.2, 0.3]], [0.14, 0.1])
-      [1, 0]
-  """
-  def apply_level(inputs, weights, thresholds) do
-    Enum.with_index(weights)
-    |> Enum.map(fn({x, i}) -> activate(inputs, x, Enum.at(thresholds, i)) end)
-  end
-
-  @doc """
-  Apply an input vector to a Zaxxon, return the output vector
-
-  ## Examples
-
-      iex> Zaxxon.apply([0.7], %Zaxxon{})
-      [false]
-
-      iex> Zaxxon.apply([0.7], %Zaxxon{weights_tensor: Tensor.new([0.6], [1])})
-      [true]
-
-      iex> Zaxxon.apply([0.4], %Zaxxon{weights_tensor: Tensor.new([0.6], [1])})
-      [false]
-  """
-  def apply(inputs, zax = %Zaxxon{ threshold_matrix: tm, weights_tensor: wt }) do
-  end
-
-  @doc """
-  Apply a scalar perturbation
-
-  (How do you test this?)
-  """
-  def perturb(x, frequency, intensity) when is_number(x) do
-    roll = Enum.random(1..100) / 100
-    case roll > frequency do
+    cond do
+      c_new >= t ->
+        Enum.each(pid_list, fn(x) ->
+          send(x, {:sig, t})
+          Process.sleep(1)
+          loop(%{ c: 0, t: t, next: pid_list})
+        end)
+      c_new > 0 ->
+        loop(%{c: c_new - (c_new * @decay), t: t, next: pid_list})
       true ->
-        case rem(round(roll * 100), 2) do
-          0 -> Helpers.cap(x + intensity)
-          1 -> Helpers.cap(x - intensity)
-        end
-      false -> x
+        loop(a)
     end
   end
-
-  @doc """
-  Perturb a zaxxon
-  """
-  def perturb(%Zaxxon{threshold_matrix: tm, weights_tensor: wm} = zax, frequency, intensity) do
-    %Zaxxon{
-      threshold_matrix: perturb(tm, frequency, intensity),
-      weights_tensor: perturb(wm, frequency, intensity)
-    }
-  end
-
-  @doc """
-  Perturb a Tensor
-  """
-  def perturb(m, frequency, intensity) do
-    cond do
-      Vector.vector?(m) ->
-        Vector.map(m, fn(x) -> perturb(x, frequency, intensity) end)
-      Matrix.matrix?(m) ->
-        Matrix.map(m, fn(x) -> perturb(x, frequency, intensity) end)
-      length(Tensor.dimensions(m)) > 2 ->
-        Tensor.map(m, fn(x) -> perturb(x, frequency, intensity) end)
-      true -> :error
-    end
-  end
-
 end
